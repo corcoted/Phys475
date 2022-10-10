@@ -1,2 +1,5 @@
 .ipynb_checkpoints/
 *.code-workspace
+*.aux
+*.log
+*.out
