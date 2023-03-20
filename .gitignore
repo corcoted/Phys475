@@ -1,1 +1,6 @@
 .ipynb_checkpoints/
+.virtual_documents/
+*.code-workspace
+*.aux
+*.log
+*.out
