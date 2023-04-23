@@ -102,28 +102,15 @@ A_exact = np.exp(np.sqrt(z0**2-z**2))*np.cos(z)
 print(f"k={k_exact:.4f}, q={q_exact:.4f}, D={D_exact:.4f}, A={A_exact:.4f}")
 
 
-# %% [markdown]
-# For the sake of completeness, let's calculate the normalization.  By hand...
-# $$
-# \frac{1}{N^2}=\int\limits_{-\infty}^{-a} \left|A\,e^{qx}\right|^2\,dx + 
-# \int\limits_{-a}^{a} \left|D \cos(kx) \right|^2\,dx +
-# \int\limits_{a}^{\infty} \left|A\,e^{-qx}\right|^2\,dx
-# $$
-# Using the even symmetry of the wavefunction, this simplifies a bit:
-# $$
-# \begin{aligned}
-# \frac{1}{2N^2} &= \int\limits_{0}^{a} \left|D \cos(kx) \right|^2\,dx +
-# \int\limits_{a}^{\infty} \left|A\,e^{-qx}\right|^2\,dx\\
-# &= D^2  \left(\frac{a}{2} + \frac12 \frac{\sin(2ka)}{2k}\right)+\frac{A^2}{2q}e^{-2qa}
-# \end{aligned}
-# $$
-
 # %%
 def psi_exact(x):
     # This is a long way to write the function, but it is clearer than the standard ways
-    return ((x<-1) * (A_exact*np.exp(q_exact*x))+
+    # normalized (did integral by hand - need to check)
+    norm = 1/np.sqrt(a*(1+np.sin(2*z)/(2*z)+np.cos(z)**2/np.sqrt(z0**2-z**2)))
+    # The booleans are zero except when true
+    return norm*(((x<-1) * (A_exact*np.exp(q_exact*x))+
            ((x>=-1) * (x<=1)) * (D_exact*np.cos(k_exact*x))+
-           (x>1) * (A_exact*np.exp(-q_exact*x)))
+           (x>1) * (A_exact*np.exp(-q_exact*x))))
 
 
 # %%
@@ -246,6 +233,7 @@ print(f"The value of b is {result.x:.4f}, with an energy of {result.fun:.4f}, co
 # %%
 zoom = 3.0 # zoom factor for wavefunctions to make them more visible
 plt.plot(x,V(x),'-k',label="V(x)") # plot the potential
+plt.plot(x,psi_exact(x)+E_exact,label="Exact")
 plt.plot(x,zoom*np.sign(wavefunctions[n//2,0])*wavefunctions[:,0]+energies[0],label="Numerov") #plot the num-th wavefunction
 plt.plot(x,zoom*psi(result.x)+result.fun,label="variational") # plot the variational wavefunction
 plt.ylim(-1,3); # set limits of vertical axis for plot
