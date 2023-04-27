@@ -26,6 +26,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.optimize as opt
+import scipy.integrate as integrate
 # %matplotlib inline
 
 # %%
@@ -69,7 +70,7 @@ z0 = np.sqrt(2*mass*V0)*a/hbar
 print(z0)
 
 # %%
-#solve for z.  We know that the first solution must be in the range [0,π/2].
+#solve for z.  We know that the first solution must be in the range [0,π/2] by comparing to the "graphical method" of McIntyre.
 z_solution = opt.root_scalar(lambda z: z*np.tan(z)-np.sqrt(z0**2-z**2), bracket=(0,np.pi/2))
 
 z=z_solution.root
@@ -99,19 +100,24 @@ k_exact = z/a
 q_exact = np.sqrt(z0**2-z**2)/a
 D_exact = 1.
 A_exact = np.exp(np.sqrt(z0**2-z**2))*np.cos(z)
-print(f"k={k_exact:.4f}, q={q_exact:.4f}, D={D_exact:.4f}, A={A_exact:.4f}")
+print(f"k={k_exact:.5f}, q={q_exact:.5f}, D={D_exact:.5f}, A={A_exact:.3f}")
 
 
 # %%
 def psi_exact(x):
     # This is a long way to write the function, but it is clearer than the standard ways
-    # normalized (did integral by hand - need to check)
+    # normalized (integrated by hand)
     norm = 1/np.sqrt(a*(1+np.sin(2*z)/(2*z)+np.cos(z)**2/np.sqrt(z0**2-z**2)))
     # The booleans are zero except when true
-    return norm*(((x<-1) * (A_exact*np.exp(q_exact*x))+
+    return norm* (((x<-1) * (A_exact*np.exp(q_exact*x))+
            ((x>=-1) * (x<=1)) * (D_exact*np.cos(k_exact*x))+
            (x>1) * (A_exact*np.exp(-q_exact*x))))
+    
 
+
+# %%
+#check normalization.  This should be True.
+np.isclose(integrate.quad(lambda x: np.abs(psi_exact(x))**2, -10,10)[0],1)
 
 # %%
 plt.plot(np.linspace(-3,3,101),psi_exact(np.linspace(-3,3,101)))
@@ -183,6 +189,7 @@ energies, wavefunctions = np.linalg.eigh(H) # "wavefunctions" is a matrix with o
 
 # %%
 true_gs_energy = energies[0]
+print(true_gs_energy)
 
 
 # %% [markdown]
@@ -198,14 +205,14 @@ def rectangle(x,a):
 
 # %%
 #trial wavefunction
-def psi(b=1.0):
+def psi(x,b=1.0):
     '''Wavefunction as a function of position x.
     The variable b is the parameter that we tune to minimize the energy.'''
     # Note, normalization is calculated below.
-    psi_unnorm = np.exp(-x**2*b) # gaussian
+    #psi_unnorm = np.exp(-x**2*b) # gaussian
     #psi_unnorm = np.cos(b*np.pi*x/2.0)*rectangle(x,1.0/b)# cosine piece
-    #psi_unnorm = np.cos(b*np.pi*x/2.0)**2*rectangle(x,1.0/b)# cosine-squared piece
-    norm = 1.0/np.sqrt(np.dot(psi_unnorm,psi_unnorm))
+    psi_unnorm = np.cos(b*np.pi*x/2.0)**2*rectangle(x,1.0/b)# cosine-squared piece
+    norm = 1.0/np.sqrt(np.dot(psi_unnorm,psi_unnorm)*(x[1]-x[0]))
     return norm*psi_unnorm
 
 #limits on b (to help the minimization function)
@@ -214,14 +221,14 @@ bmax = 10.
 
 
 # %%
-def ev(psi):
+def ev(psi): #ev of some wavefunction psi
     '''Calculate expectation value of energy'''
-    return np.dot(np.dot(psi,H),psi)[0,0]
+    return np.dot(np.dot(psi,H),psi)[0,0]*(x[1]-x[0])
 
 
 # %%
 # minimize expectation value with respect to b
-result=opt.minimize_scalar(lambda b: ev(psi(b)),(bmin,bmax))
+result=opt.minimize_scalar(lambda b: ev(psi(x,b)),(bmin,bmax))
 
 
 # %% [markdown]
@@ -231,12 +238,12 @@ result=opt.minimize_scalar(lambda b: ev(psi(b)),(bmin,bmax))
 print(f"The value of b is {result.x:.4f}, with an energy of {result.fun:.4f}, compared to the energy from the Numerov diagonalization of {true_gs_energy:.4f}.")
 
 # %%
-zoom = 3.0 # zoom factor for wavefunctions to make them more visible
+zoom = 2.0 # zoom factor for wavefunctions to make them more visible
 plt.plot(x,V(x),'-k',label="V(x)") # plot the potential
-plt.plot(x,psi_exact(x)+E_exact,label="Exact")
-plt.plot(x,zoom*np.sign(wavefunctions[n//2,0])*wavefunctions[:,0]+energies[0],label="Numerov") #plot the num-th wavefunction
-plt.plot(x,zoom*psi(result.x)+result.fun,label="variational") # plot the variational wavefunction
-plt.ylim(-1,3); # set limits of vertical axis for plot
+plt.plot(x,zoom*psi_exact(x)+E_exact,label="Exact")
+#plt.plot(x,zoom*np.sign(wavefunctions[n//2,0])*wavefunctions[:,0]+energies[0],label="Numerov") #plot the num-th wavefunction
+plt.plot(x,zoom*psi(x,result.x)+result.fun,label="variational") # plot the variational wavefunction
+plt.ylim(-0.1,3); # set limits of vertical axis for plot
 plt.xlim(-3,3); # set limits of horizontal axis for plot
 plt.legend();
 plt.xlabel("x");
