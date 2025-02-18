@@ -1,0 +1,13 @@
+name: env
+channels:
+  - conda-forge
+dependencies:
+  - python=3
+  - numpy
+  - scipy
+  - sympy
+  - numdifftools
+  - matplotlib
+  - ipykernel
+
+prefix: ./env
