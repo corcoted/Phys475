@@ -1,0 +1,291 @@
+% !TeX spellcheck = en_US
+% !TeX program = xelatex
+% !TeX encoding = UTF-8
+
+% Search and replace Comparing approximate solutions to Schr\"odinger's Equation :COURSE: :DATE:
+%
+%
+
+\documentclass[fontsize=11pt,paper=letter,twoside=false,onecolumn]{article} % use larger type; default would be 10pt
+\usepackage{amsmath}
+%\usepackage{scrpage2}
+
+%misc formating packages
+%\usepackage{graphicx}
+%\usepackage{wrapfig}
+%\usepackage{esint}
+\usepackage{siunitx}
+\usepackage{cancel}
+
+% Font definitions
+%\usepackage[osf,p]{libertinus}
+\usepackage{notomath}
+
+% other LaTeX packages.....
+\usepackage[margin=1in]{geometry} % See geometry.pdf to learn the layout options. There are lots.
+
+%\usepackage{graphicx} % support the \includegraphics command and options
+\usepackage{enumerate}
+
+\usepackage[colorlinks,xetex,breaklinks]{hyperref}
+
+% Define the following to propagate the title, author, etc. through the titlepagea and headers
+\newcommand{\mytitle}{Comparing approximate solutions to Schr\"odinger's Equation}
+\newcommand{\myauthor}{Phys 475}
+\newcommand{\mydate}{Writing Assignment 2 -- Due 2/25/2025}
+
+\title{\mytitle}
+\author{\myauthor}
+\date{\mydate} % Activate to display a given date or no date (if empty),
+         % otherwise the current date is printed 
+
+\newcommand{\micro}{μ} % Define micro so that I can easily type the upright mu
+\renewcommand{\perp}{⊥}
+%headers and footers
+%\clearscrheadings
+%\ihead{{\myauthor}}
+%\chead{\mytitle}
+%\ohead{\mydate}
+
+%\cfoot{\thepage}
+\begin{document}
+\thispagestyle{plain}
+{\centering
+{\LARGE \mytitle} \\
+{\large \myauthor \\ \mydate}
+
+}
+
+
+%Begin text here
+This exercise will explore a few different ways of finding approximate solutions to Schr\"odinger's Equation.  So that we can compare the various techniques, we'll solve one problem several ways.
+
+\begin{itemize}
+\item Write up your work for this exercise as a formal document.  Provide the results of the calculations you do in the form of a narrative.  Tables and graphs are appropriate ways to present data. Include discussion of the questions asked at the end of this document.
+\item An Excel spreadsheet for recording some of the data from these exercises may be downloaded from Canvas.  Using this is optional, but it may help you organize your work.
+\item The Jupyter Python file for the last 3 methods may be downloaded from Canvas or\\ \href{https://raw.githubusercontent.com/corcoted/Phys475/main/Approximations-combined.ipynb}{https://raw.githubusercontent.com/corcoted/Phys475/main/Approximations-combined.ipynb}.  If you don't already have python and jupyter on your computer, I highly recommend Google's ``colaboratory'' environment which runs in your browser: \href{https://colab.research.google.com/}{https://colab.research.google.com/}.
+\end{itemize}
+
+\tableofcontents
+
+\section{Background}
+The target Hamiltonian we'll be calculating is a modified harmonic oscillator:
+\[
+\hat{H} = \frac{\hat{p}^2}{2m} + \frac12 m\omega^2 \hat{x}^2 + \frac12 m \alpha^2\hat{x}^2,
+\]
+where $\alpha$ is a positive real constant with units of angular frequency and $\alpha \ll \omega$.
+
+I've chosen this system because we can solve it exactly.  This will give us a way to evaluate how accurate our approximation methods are.  First, let's find the \emph{exact} eigenvalues and eigenstates (in wavefunction notation) by using a suitable change of variables such that $\hat{H}$ can be rewritten as a simple harmonic oscillator.  Call these solutions $\bar{E}_n$ and $\bar{\psi}_n(x)$.
+
+\paragraph*{Solution:}
+This is a new harmonic oscillator with frequency $\omega' = \sqrt{\omega^2+\alpha^2}$.
+So, the exact energies are
+\begin{equation}\label{eq:exact_energies}
+    E_n = \hbar\omega'(n+1/2),    
+\end{equation}
+and the exact eigenstate wavefunctions are
+\begin{equation}\label{eq:exact_states}
+    \phi_n(x)= \left(\frac{m\omega'}{\pi\hbar} \right)^{1/4}
+    \frac{1}{\sqrt{2^nn!}}\, H_n\left(\sqrt{\frac{m\omega'}{m}}\,x \right)\exp\left(-\frac{m\omega'x^2}{2\hbar}\right),
+\end{equation}
+where $H_n$ are the Hermite polynomials, McIntyre Eq.~(9.65).
+
+\section{``Natural'' Units}
+Before we start doing numerical calculations, it would be helpful to express the problem in a set of units such that all of the various constants are $1$.  
+This is a common trick when doing numerical calculations to avoid rounding errors and similar bad things.
+We can define base units of length, mass, and time using the constants in the problem.
+(We don't need a unit of charge for this problem.)
+
+Let's pick the simplest choice by setting $m=1$, $\omega=1$, and $\hbar=1$.  We can find the units of length, mass, and time in our new set of units by forming products from these three constants.  (For example, the unit of energy is $\hbar\omega$.)
+
+The basic technique is note the dimensions of our fixed constants above.
+I'll use square brackets to mean ``dimensionality of''.
+Our base dimensions are mass ($M$), length ($L$), and time ($T$).
+For example angular frequency would be $[\omega]=T^{-1}$. (Note that we don't need to include dimensionless numerical constants like $2\pi$.)
+The constants we are choosing as ``one'' are
+
+\[
+    [m] = M,\qquad [\omega]=T^{-1}, \qquad [\hbar]=M L^2 T^{-1}.    
+\]
+
+\paragraph*{Problem: }Verify the dimensions of $\hbar$ above.
+
+For any other quantity, we can find an equivalent set of dimensions as powers of our three fixed constants.  For example, to find the equivalent for position, we have:
+\begin{align*}
+    [x] = L^1 &= [m]^u [\omega]^v [\hbar]^w,\\
+    \intertext{where $u$, $v$, and $w$ are unknown constants.  Substituing in the dimensions of the constants above, we get}\\
+    [x] = L^1 &= (M)^u (T^{-1})^v (ML^2 T^{-1})^w,\\
+    &= M^{u+w}T^{-v-w}L^{2w}.
+\end{align*}
+The exponents of each dimension must match on both sides.
+Setting these equation we get three equations, one each for $L$, $M$, and $T$:
+\begin{align*}
+ L:\qquad 1 & = 2w, \\
+ T:\qquad 0 & = -v -w, \\
+ M:\qquad 0 & = u+w.
+\end{align*}
+Solving for $u$, $v$, and $w$, we get
+\[
+u=-1/2, \quad v=-1/2 , \quad w=1/2.
+\]
+Finally, $x$ has equivalent units to
+\[
+[x] = [m^{-1/2} \omega^{-1/2} \hbar^{1/2}] = \left[\sqrt{\frac{\hbar}{m\omega}}\right].   
+\]
+
+The purpose of defining such a set of units is that it gives us a way to convert our upcoming numerical results back into the original ``laboratory'' units.
+For example, if we calculate that the expectation value of $x$ is $0.4$ in our new ``natural'' units, then the value in ``lab'' units is $x=0.4 \sqrt{\hbar/m\omega}$, where we can then substitute in the proper values of $m$, $\hbar$, and $\omega$ in, for example, SI units.
+
+\paragraph*{Problem: }Verify that the equivalent natural units for momentum are
+\[
+[p] = \left[\sqrt{m\hbar \omega}\right].    
+\]
+
+\paragraph*{Problem: }Rewrite the Hamiltonian and the exact solutions in this new set of units by setting $m=\hbar=\omega=1$.  Note that $\alpha$ is still a variable.
+
+\begin{equation}\label{eq:fullH}
+\textbf{Answer:}\qquad\hat{H} = \frac12 \hat{p}^2 + \frac12 \hat{x}^2 + \frac12 \alpha\hat{x}^2.
+\end{equation}
+
+\paragraph*{Problem: }What are the operators $\hat{x}$ and $\hat{p}$ (of the unperturbed system) in this new set of units in terms of the raising and lowering operators?
+
+\[
+\textbf{Answer:}\qquad
+\hat{x} = \frac{1}{\sqrt{2}}(\hat{a}^\dagger+\hat{a})
+\qquad
+\hat{p} = \frac{i}{\sqrt{2}}(\hat{a}^\dagger-\hat{a})
+\]
+
+\section{Method 0: Exact numerical solutions}
+We're interested in how well our approximations work for various values of $\alpha$.
+Copy the table below onto a new sheet of paper  (or use the provided Excel spreadsheet).  Write down the exact numerical eigenvalues (in our new units) for the values of $\alpha$ and $n$ shown.  Use 6 significant digits.
+
+\begin{center}
+\begin{tabular}{c|ccc}
+$\alpha$ & $\qquad\bar{E}_0\qquad$ & $\qquad\bar{E}_1\qquad$ &  $\qquad\bar{E}_4\qquad$ \\
+\hline
+0 & & & \\
+0.1 & & & \\
+0.3 & & & \\
+0.5 & & & \\
+\end{tabular}
+\end{center}
+
+\section{Method 1: Perturbation theory}
+\subsection{Eigenvalues}
+Use perturbation theory to calculate approximate eigenvalues by assuming the $\alpha$ term in the original Hamiltonian is the perturbation.  Give an analytical result in terms of $\alpha$ and $n$.
+[Hint: this is very similar to Section 10.6.1 of McIntyre.]
+
+Next, make two tables like the one above containing numerical answers: one for the eigenvalues using 1st-order P.T. and one for the eigenvalues using 2nd-order P.T.
+
+In the tables, include a new column for each eigenstate: the error relative to the exact solution.
+
+\subsection{Eigenstates}
+Evaluating the error in the eigenstates is less obvious.  There are several ways of defining the ``error.''  A simple choice uses the inner product:
+\[
+\text{error} = 1-\left| \langle \psi^{\text{approx}}_n | \bar{\psi}_n\rangle \right|^2 = 1-\left| \int\limits_{-\infty}^\infty \psi^{*\,\text{approx}}_n(x)
+\bar{\psi}_n(x)\,dx \right|^2.
+\]
+With this definition, the error will be a value between 0 and 1.
+
+Calculate the eigenstates using first order P.T.
+Give an analytic answer in terms of $\alpha$ and $n$.
+Write the answer in wavefunction notation and perform the integrals to fill out the a table like those above.
+(It is sufficient to calculate the integrals numerically using your software of choice.)
+
+\section{Method 2: Truncated basis set solution in the energy basis}
+The key idea of truncated basis set methods is to approximate the Hamiltonian as a finite-dimensional matrix.
+If the basis set is a reasonable approximation to the true eigenstate basis, then the approximation will be good.
+We'll look at two types of basis sets.
+First, we'll use the energy eigenfunctions of the unperturbed problem as our basis set.
+Later, we'll use the position basis.
+
+\vspace*{1ex}
+\noindent The method is straightforward:
+\begin{enumerate}
+\item Identify a basis set that you want to use.  In this case, our basis states will be the unperturbed eigenstates $| n^{(0)}\rangle $ for $n\in 0,\ldots, n_\text{max}$.  One of our goals will be to determine how large $n_\text{max}$ must be to yield small errors.
+\item Define a Hamiltonian matrix of size $(n_\text{max}+1) \times (n_\text{max}+1)$ according to
+\[
+H_{jk} = \left<j^{(0)} \middle\vert \hat{H} \middle\vert k^{(0)} \right>\qquad\text{for }j,k \in 0,\ldots, n_\text{max},
+\]
+where $\hat{H}$ is the \emph{full} Hamiltonian (Eq.~\eqref{eq:fullH}), not the perturbation.
+\item Calculate the eigenvalues and eigenvectors of the matrix $H_{jk}$.  These are the approximate solutions to the perturbed Hamiltonian.
+\end{enumerate}
+
+By hand, calculate the elements of the matrix $H_{jk}$ and then use the computer to calculate its eigenvalues and eigenvectors for some choice of $n_\text{max}$.
+\[
+\text{Hint:}\qquad H_{jk} = \left<j^{(0)} \middle\vert \hat{H} \middle\vert k^{(0)} \right>
+= E^{(0)}_{k} \delta_{jk} + \left<j^{(0)} \middle\vert \hat{H}^\prime \middle\vert k^{(0)} \right>
+\]
+
+The provided Jupyter Python notebook has this setup for you.
+Adjust the values of the variables \texttt{alpha} and \texttt{nmax} and ``Run all cells''.
+
+Fill out a table.  How large must $n_\text{max}$ be for your answers to be at least as accurate as 2nd order P.T.?  How does this depend on the values of $n$ and $\alpha$.  (Hint: start with $n_\text{max}=4$ and then increase it, noting how the errors change when you re-run the code.)
+
+\section{Method 3: Truncated basis set solution in the position basis}
+If we don't even have an unperturbed problem that we can base our solution off of, we can resort to more brute-force methods.  Solving the problem in the position basis is one such method.  Here we'll use the Numerov method as described in the paper by Pillai et al\footnote{Pillai, M., Goglio, J., \& Walker, T. G. (2012). Matrix Numerov method for solving Schrödinger’s equation. American Journal of Physics, 80(11), 1017–1019. http://doi.org/10.1119/1.4748813}.
+
+I've set up the Jupyter Python notebook for you.  However, you need to do the following:
+\begin{enumerate}
+\item Enter the correct potential energy function for our problem.
+\item Adjust the values of the variables \texttt{xmax} and \texttt{n} to adjust the accuracy of the solution.
+The value of \texttt{xmax} determines the range of $x$ values used in the calculation.
+The value of \texttt{n} determines the number of $x$ values used (not the energy levels). 
+Increasing these will increase the accuracy at the cost of memory and computation time.
+\item The ``Results'' section prints and graphs some of the calculated solutions.
+Adjust these to show the states you are interested in.
+\end{enumerate}
+
+Again, our goal is to compare with the exact solutions.
+Try to find the minimal values of \texttt{n} and \texttt{xmax} that give you solutions as least as accurate as 2nd order P.T. for the states listed in the table above.
+
+\section{Method 4: Variational method}
+The last method we'll look at is called the "Variational Method".
+It is primarily useful for finding the ground state (although higher states can be found with some additional work).
+
+The basic recipe is this:
+
+\begin{enumerate}
+    \item Guess a functional form for the ground state wavefunction ("trial wavefunction").  This must have at least one adjustable parameter that we can use to alter the shape of the wavefunction.
+    Let's call this parameter $\beta$.
+    \item Calculate the expectation value of the (full) Hamiltonian with respect to the trial wavefunction.  If doing this with paper and pencil, or with symbolic algebra software, your answer will be a function of the free parameter $\beta$.  If doing this numerically, guess a value of $\beta$ (perhaps based on the shape of the potential energy function).  (Don't forget to normalize the wavefunction!)
+    \item Minimize $\langle H \rangle$ with respect to $\beta$.  In other words, find the value of $\beta$ that gives the lowest energy.  This could be done using calculus (minimization by taking derivatives, perhaps using Lagrange multipliers for complicated problems) or numerically using a minimization algorithm like Levenberg-Marquardt (the typical default method for things like Excel's solver).
+    \item The wavefunction using the value of $\beta$ that minimizes $\langle H \rangle$ is our best guess of the ground state wavefunction, and the value of $\langle H \rangle$ is our best guess of the ground state energy eigenvalue.
+\end{enumerate}
+
+In principle, if your functional form happens to match that of the true ground state wavefunction, the variational method will give you the exact solution.  If your trial wavefunction is not the exact solution, the calculated energy will be higher than the true ground state energy. (The proof is not hard.  Hint: any state can be written as a linear superposition of the true eigenstates.)
+
+Use the provided python notebook to solve our problem with two different trial wavefunctions:
+
+$$
+\begin{aligned}
+\psi_1(x) &= C \exp(-\beta x^2) \\
+\psi_2(x) &= \begin{cases}
+C \cos^2(\beta x) & \text{for }-\pi/(2\beta) < x < \pi/(2\beta) \\
+0 & \text{otherwise}
+\end{cases} 
+\end{aligned}
+$$
+In each case $C$ is the normalization constant, which may depend on $\beta$.
+
+You should report the value of $\beta$ that minimizes the energy for each trial wavefunction and the corresponding energy value.
+Of course $\psi_1(x)$ should give you the true (exact) solution, but $\psi_2(x)$ will give you an approximate solution.
+
+Hint: rather than calculating $C$ directly, you can also normalize after taking the expectation value:
+
+$$
+\langle H \rangle = \frac{\langle \psi \mid H \mid \psi \rangle}{\langle \psi \mid \psi \rangle}
+$$
+This breaks some of our usual rules about states, but no harm is done because for the unnormalized states $\langle \psi \mid \psi \rangle = |C|^2$.
+
+\section{Discussion}
+Below are some additional questions to consider.  Discuss these in your report.
+\begin{enumerate}
+\item Which method is ``best''?  What do we mean by ``best''?  How does your answer depend on the tools available to you?
+\item What are the advantages and disadvantages of the various types of approximations we used in this exercise?  (Generalize beyond this particular problem using what you've learned in this exercise.)
+\item Because the numerical methods are easy to set up and fast on modern computers, how is perturbation theory still useful?
+\end{enumerate}
+
+
+\end{document}
