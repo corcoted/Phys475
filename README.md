@@ -1,7 +1,7 @@
 # Phys475
-Python examples for Duquesne Phys475 - Advanced Quantum Mechanics
+Python examples for Duquesne Phys474 and Phys475 - Advanced Quantum Mechanics
 
-Ted Corcovilos, (c) 2021
+Ted Corcovilos, (c) 2026
 
 Currently this repository is in disarray. A few highlights:
 
