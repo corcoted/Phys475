@@ -6,11 +6,11 @@
 #       extension: .py
 #       format_name: percent
 #       format_version: '1.3'
-#       jupytext_version: 1.14.5
+#       jupytext_version: 1.19.6
 #   kernelspec:
-#     display_name: Python (scipy)
+#     display_name: Python (Pixi)
 #     language: python
-#     name: scipy
+#     name: pixi-kernel-python3
 # ---
 
 # %% [markdown]
