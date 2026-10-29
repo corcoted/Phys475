@@ -109,6 +109,4 @@ plt.xlabel("x");
 plt.ylabel("Energy");
 plt.ylim(-1,12); # set limits of vertical axis for plot
 
-# %% editable=true deletable=true slideshow={"slide_type": ""}
-
 # %%
