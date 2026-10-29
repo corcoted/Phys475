@@ -1,0 +1,16 @@
+[workspace]
+authors = ["Ted Corcovilos <corcoted@gmail.com>"]
+channels = ["conda-forge"]
+platforms = ["win-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+python = "3.*"
+numpy = "*"
+scipy = "*"
+sympy = "*"
+numdifftools = "*"
+matplotlib = "*"
+ipykernel = "*"

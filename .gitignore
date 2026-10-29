@@ -5,3 +5,6 @@
 *.log
 *.out
 env/
+# pixi environments
+.pixi/*
+!.pixi/config.toml
