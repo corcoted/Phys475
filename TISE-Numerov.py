@@ -61,6 +61,7 @@ def V(x):
 
 
 # %% id="6K4uqFHXUMf4"
+# apply autoscale
 if (autoscale):
     #Emax is the maximum energy for which to check for eigenvalues
     Emax = 20.0
@@ -73,7 +74,8 @@ if (autoscale):
     xmax = dx*(n+1)/2
 
 # %% id="E2WIlgozUMf4" outputId="0e7795ad-9cb2-4bbb-abe3-8666bb0aa50f" colab={"base_uri": "https://localhost:8080/"}
-xmin, xmax, n #show the limits and number of steps
+#show the limits and number of steps
+xmin, xmax, n
 
 # %% id="CG_UIOMXUMf5"
 #define the x coordinates
@@ -97,9 +99,11 @@ H = KE + np.diag(V(x))
 energies, wavefunctions = np.linalg.eigh(H) # "wavefunctions" is a matrix with one eigenvector in each column.
 
 # %% id="q4IMVz7bUMf8" outputId="6dd9cd08-f439-4974-a062-d3cd2478a15c" colab={"base_uri": "https://localhost:8080/"}
-energies[0:5] #display the lowest five energies
+#display the lowest five energies
+energies[0:5]
 
 # %% id="shAr0qKgUMf8" outputId="a1460968-e5c8-47c7-9c0a-ec0700133154" colab={"base_uri": "https://localhost:8080/", "height": 455}
+# plot the potential and a few wavefunctions
 number = [0,1,2,3,4] #which wavefunctions to plot, starting counting from zero
 zoom = -3.0 # zoom factor for wavefunctions to make them more visible
 plt.plot(x,V(x),'-k',label="V(x)") # plot the potential
