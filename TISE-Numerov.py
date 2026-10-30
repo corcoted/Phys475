@@ -42,7 +42,7 @@ V0 = 10.0
 # bounds (These are overwritten if autoscale=True)
 xmin = -5.0 # lower bound of position
 xmax = 5.0 # upper bound of position
-n = 100 # number of steps (may be overwritten if autoscale == True)
+n = 40 # number of steps (may be overwritten if autoscale == True)
 dx = (xmax-xmin)/(n-1)
 
 
