@@ -73,7 +73,7 @@ if (autoscale):
     xmin = -dx*(n+1)/2
     xmax = dx*(n+1)/2
 
-# %% id="E2WIlgozUMf4" outputId="0e7795ad-9cb2-4bbb-abe3-8666bb0aa50f" colab={"base_uri": "https://localhost:8080/"}
+# %% colab={"base_uri": "https://localhost:8080/"} id="E2WIlgozUMf4" outputId="0e7795ad-9cb2-4bbb-abe3-8666bb0aa50f"
 #show the limits and number of steps
 xmin, xmax, n
 
@@ -98,11 +98,11 @@ H = KE + np.diag(V(x))
 #Calculate eigenvalues and eigenvectors of H
 energies, wavefunctions = np.linalg.eigh(H) # "wavefunctions" is a matrix with one eigenvector in each column.
 
-# %% id="q4IMVz7bUMf8" outputId="6dd9cd08-f439-4974-a062-d3cd2478a15c" colab={"base_uri": "https://localhost:8080/"}
+# %% colab={"base_uri": "https://localhost:8080/"} id="q4IMVz7bUMf8" outputId="6dd9cd08-f439-4974-a062-d3cd2478a15c"
 #display the lowest five energies
 energies[0:5]
 
-# %% id="shAr0qKgUMf8" outputId="a1460968-e5c8-47c7-9c0a-ec0700133154" colab={"base_uri": "https://localhost:8080/", "height": 455}
+# %% colab={"base_uri": "https://localhost:8080/", "height": 455} id="shAr0qKgUMf8" outputId="a1460968-e5c8-47c7-9c0a-ec0700133154"
 # plot the potential and a few wavefunctions
 number = [0,1,2,3,4] #which wavefunctions to plot, starting counting from zero
 zoom = -3.0 # zoom factor for wavefunctions to make them more visible
@@ -113,7 +113,3 @@ plt.legend();
 plt.xlabel("x");
 plt.ylabel("Energy");
 plt.ylim(-1,12); # set limits of vertical axis for plot
-
-# %% deletable=true editable=true id="RoW2_05sUMf8"
-
-# %% id="MbjW_INtUMf8"
