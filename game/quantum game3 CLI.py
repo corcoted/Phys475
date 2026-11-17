@@ -3,7 +3,7 @@
 
 # # Quantum Guessing Game
 # by Ted Corcovilos 20160610
-# 
+#
 # The computer picks a random quantum spin-1/2 state from a predetermined list.
 # The player requests measurements (Pauli operators Sx, Sy, or Sz) and attempts to guess the state.
 # v.3 20261117 migrate to external game files
@@ -160,3 +160,13 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+args
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-f","--file", help="Name of game file", default='game1.csv')
+    args = parser.parse_args()
+
+args
+
+
