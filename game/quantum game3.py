@@ -31,10 +31,7 @@ def read_game_file(name):
         states.append(vector)
     return np.concat(states).reshape((-1,3)), comment
 
-# ## Game rules
-# The cell below contains the rules for the game: List of possible states, penalty for incorrect guess, and the type of die to use.
-
-#States are stored as an array of Bloch vectors (length of vectors must be <= 1) in a csv file
+# States are stored as an array of Bloch vectors (length of vectors must be <= 1) in a csv file
 
 def build_lookup(states):
     #Build lookup table (probablility of measuring + for each state) [axis, states]
@@ -133,27 +130,30 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("-f","--file", help="Name of game file", default='game1.csv')
     args = parser.parse_args()
-    game_file=args.file
+    game_file=Path(args.file)
+    if not game_file.exists():
+        raise OSError(f"Game file {game_file} not found.")
 
     # TODO don't use globals
-    global states
-    global game_comment
-    states, game_comment = read_game_file(game_file)
-
+    # some game constants
     global penalty; penalty = 5 #points for incorrect guess
     global maxguess; maxguess = 200 # maximum number of measurements allowed
     global dsize; dsize = 20 # size of the dice used for rolling
 
-    global Nstates; Nstates = states.shape[0]
-
+    # Game tables, etc.
+    global states
+    global Nstates
+    global game_comment
     global measurements
     global Nmeasurements
+
+    states, game_comment = read_game_file(game_file)
+    Nstates = states.shape[0]
     measurements = np.array([[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]]) #measurement axes (Bloch sphere rep. of Pauli matrices)
     Nmeasurements = measurements.shape[0] # number of possible measurements
     global lookup
     lookup = build_lookup(states)
     while not q:
-        #c, g, q = player3(aggressiveness=4.0,auto=False)
         c, g, q = play()
         total = total + c
         print("Total score = {}".format(total))
